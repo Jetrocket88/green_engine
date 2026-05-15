@@ -8,4 +8,4 @@ Straftat is one of my most favourite movement shooters because it includes:
   5. Simplicity
 
 My game aims to recreate all of these features. 
-Link to straftat game [here]([url](https://store.steampowered.com/app/2386720/STRAFTAT/))
+Link to straftat game [here](https://store.steampowered.com/app/2386720/STRAFTAT/)
