@@ -1,11 +1,13 @@
 @echo off
 
 if "%1"=="--reconfig" (
+    echo "Cleaning..."
     rmdir /s /q build 
 )
 
 if not exist build (
-    cmake -B build -G "MinGW Makefiles"
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build -G "MinGW Makefiles"
+    cp build/compile_commands.json
 )
 
 cmake --build build --parallel 4

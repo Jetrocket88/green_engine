@@ -9,7 +9,7 @@ class VBO {
 public:
     unsigned int ID {};
     VBO();
-    void add_data(const float* data, size_t n);
+    void add_data(const void* data, size_t size);
 
 
 

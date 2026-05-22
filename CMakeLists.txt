@@ -4,8 +4,6 @@ project(green_eng)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-
-
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE VENDOR_SOURCES "vendor/*.cpp" "vendor/*.c")
 add_executable(${PROJECT_NAME} 
@@ -17,6 +15,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/
     vendor/glad/include
     vendor/glfw/include
+    vendor/stb
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

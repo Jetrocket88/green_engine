@@ -11,6 +11,9 @@
 
 #include "../vendor/glm/glm.hpp"
 
+#include "../vendor/glm/gtc/matrix_transform.hpp"
+#include "../vendor/glm/gtc/type_ptr.hpp"
+
 enum ShaderType {
     VERTEX,
     FRAGMENT
@@ -27,6 +30,7 @@ public:
     void bind();
 
     void set_vec4f(const std::string& location, const glm::vec4& vec);
+    void set_mat4f(const std::string& location, const glm::mat4* vec);
 
 
     
