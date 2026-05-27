@@ -11,8 +11,15 @@
 #include "../vendor/glm/gtc/matrix_transform.hpp"
 #include "../vendor/glm/gtc/type_ptr.hpp"
 
+#include "../vendor/imgui/imgui.h"
+#include "../vendor/imgui/backends/imgui_impl_glfw.h"
+#include "../vendor/imgui/backends/imgui_impl_opengl3.h"
+
 #include "core/window.h"
 #include "core/error.h"
+#include "core/state.h"
+#include "core/input_state.h"
+
 #include "renderer/shader.h"
 #include "renderer/vbo.h"
 #include "renderer/vao.h"
@@ -21,9 +28,11 @@
 #include "renderer/text.h"
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
+#include "renderer/renderer.h"
+#include "renderer/model_loader.h"
 
-#include "core/state.h"
-
+glm::vec4 RED = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+glm::vec4 GRAY = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 int main() {
 
@@ -34,107 +43,104 @@ int main() {
 
     glfwSetWindowUserPointer(window.ptr, &state);
     
-    Shader shader;
-    shader.load_shaders("assets/shaders/vertex.shader", "assets/shaders/fragment.shader");
-    shader.bind();
+    Renderer renderer; 
+    renderer.init(window.ptr);
 
-    Texture texture("assets/images/image.jpg", 0);
-    
-    Vertex v[4];
-    v[0].position = glm::vec3(1.0f, 1.0f, 0.0f      );
-    v[0].color =    glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    v[0].texCoord = glm::vec2(1.0f, 1.0f            );
-
-    v[1].position = glm::vec3(1.0f, -1.0f, 0.0f     );
-    v[1].color =    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    v[1].texCoord = glm::vec2(1.0f, 0.0f            );
-
-    v[2].position = glm::vec3(-1.0f, -1.0f, 0.0f    );
-    v[2].color =    glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    v[2].texCoord = glm::vec2(0.0f, 0.0f            );
-
-    v[3].position = glm::vec3(-1.0f, 1.0f, 0.0f     );
-    v[3].color =    glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    v[3].texCoord = glm::vec2(0.0f, 1.0f            );
-    
-    const unsigned int indices[] = { 
-        0, 1, 3,   
-        1, 2, 3
-    };  
-
-    VAO vao;
-    vao.bind();
-
-    VBO vbo;
-    vbo.add_data(v, sizeof(v));
-
-    IBO ibo;
-    ibo.add_data(indices, sizeof(indices) / sizeof(indices[0]));
-
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-    glEnableVertexAttribArray(0);
-    glCheckError();
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
-    glCheckError();
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, texCoord)));
-    glEnableVertexAttribArray(2);
-    glCheckError();
-
-    vao.unbind();
-    glfwSetInputMode(window.ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window.ptr, [](GLFWwindow*w, double x, double y) {
         auto* s = static_cast<ApplicationSate*>(glfwGetWindowUserPointer(w));
         if (!s) return;
+        if (s->paused) return;
         s->camera.on_mouse_move(x, y);
     });
 
     Camera       &cam = state.camera;
     InputState &input = state.input;
 
+    std::vector<glm::vec3> out_vertices, out_normals;
+    std::vector<glm::vec2> out_uvs;
+
+    ModelLoader::load_obj(
+        "assets/models/test.obj",
+        out_vertices,
+        out_uvs,
+        out_normals
+    );
+
+
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui_ImplGlfw_InitForOpenGL(window.ptr, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+     
+    ImGui::StyleColorsDark(); 
+    glm::mat4 view = glm::mat4(1.0f);
+    float fov = 45.0f;
+    float nearPlane = 0.1f;
+    float farPlane = 100.0f;
+
     while(!glfwWindowShouldClose(window.ptr))
     {
-        //Calculate delta_time ---------------------------------------------------------------
-        float current_frame = glfwGetTime();
-        state.delta_time = current_frame - state.last_frame;
-        state.last_frame = current_frame;
+        // Start of frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Your ImGui calls go here
+        std::string movement = "Walking";
+        if (cam.cam_speed > 0.007f) movement = "Sprinting";
+        else movement = "Walking";
+
+        ImGui::Begin("Debug");
+        ImGui::Text(movement.c_str());
+        ImGui::SliderFloat("Camera Near Plane", &nearPlane, 0.01f, 10.0f);
+        ImGui::SliderFloat("Camera Far Plane", &farPlane, 50.0f, 150.0f);
+        ImGui::SliderFloat("FOV Slider", &fov, 30.0f, 100.0f);
+        ImGui::End();
+
+        state.calculate_dt();
 
         //Camera and matrix stuff ------------------------------------------------------------
         glm::mat4 model = glm::mat4(1.0f);
 
-        cam.update_pos(&input.keys[0], state.delta_time);
-        glm::mat4 view = cam.calculate_view();
+        view = cam.calculate_view();
+        if (!state.paused)
+            cam.update_pos(&input.keys[0], &input.prev_keys[0], state.delta_time); 
 
-        glm::mat4 projection = glm::mat4(1.0f);
-        const float fov = 45.0f;
-        projection = glm::perspective(glm::radians(fov), (float)window.width / (float)window.height, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(
+            glm::radians(fov),
+            (float)window.width / (float)window.height,
+            nearPlane,
+            farPlane
+        );
         
-        //opengl stuff goes here ------------------------------------------------------------- 
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glCheckError();
+        //Managing Pausing the game
+        //Might not be a part of the actual game
+        if (state.input.just_pressed(GLFW_KEY_F)) {
+            state.paused = !state.paused; 
+            if (state.paused)  {
+                glfwSetInputMode(window.ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                cam.first_mouse = true;
+            }
+            else {
+                glfwSetInputMode(window.ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+        }
 
-        shader.bind();
-        shader.set_mat4f("view"      , &view      );
-        shader.set_mat4f("projection", &projection);
-        shader.set_mat4f("model",      &model     );
+        if (!state.paused) { renderer.render_solid_background(GRAY); }
+        else               { renderer.render_solid_background(RED ); }
 
-        texture.bind();
-        vao.bind();
-        ibo.bind();
+        MVP mvp = (MVP){ .model = model, .view = view, .projection = projection };
+        renderer.begin_frame(mvp);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glCheckError();
-        //-------------------------------------------------------------------------------------
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        //Populates the state.input.keys array with the values of the pressed keys 
-        poll_input(window.ptr, state.input);
-
-        glfwSwapBuffers(window.ptr);
-        glfwPollEvents();    
+        input.poll_input(window.ptr);
+        renderer.end_frame(window.ptr);
 
         check_exit(window.ptr, &input.keys[0]);
     }

@@ -16,6 +16,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     vendor/glad/include
     vendor/glfw/include
     vendor/stb
+    vendor/imgui/
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

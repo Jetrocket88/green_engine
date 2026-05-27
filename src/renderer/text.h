@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "Texture.h"
-#include "Vertex.h"
 
 class Text {
 public:

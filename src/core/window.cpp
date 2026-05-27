@@ -1,4 +1,5 @@
 #include "window.h"
+#include "GLFW/glfw3.h"
 
 void check_exit(GLFWwindow* window, bool *keys) {
     if (keys[GLFW_KEY_ESCAPE]) { glfwSetWindowShouldClose(window, true); } 
@@ -29,6 +30,12 @@ Window::Window(size_t width, size_t height, std::string text) {
     }  
 
     glViewport(0, 0, this->width, this->height);
+    glfwSetInputMode(this->ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetInputMode(this->ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(this->ptr, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
 }
+
 

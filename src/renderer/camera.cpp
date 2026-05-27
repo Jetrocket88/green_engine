@@ -7,7 +7,7 @@ Camera::Camera() {
     camera_target = glm::vec3(0.0f);
     yaw           = -90.0f;
     pitch         =   0.0f;
-    cam_speed     =   0.05f;
+    cam_speed     =   0.007f;
     first_mouse   =   true;
     lastX = lastY =   0.0f;
 }
@@ -16,7 +16,7 @@ glm::mat4 Camera::calculate_view() {
     return this->view;
 }
 
-void Camera::update_pos(bool *keys, float delta_time) {
+void Camera::update_pos(bool *keys, bool *prev_keys, float delta_time) {
     this->camera_dir   = glm::normalize(this->camera_pos - this->camera_target);
     this->camera_right = glm::normalize(glm::cross(this->camera_up, this->camera_dir));
 
@@ -34,8 +34,14 @@ void Camera::update_pos(bool *keys, float delta_time) {
 
     if (keys[GLFW_KEY_LEFT_SHIFT]) { this->camera_pos -= cam_speed * camera_up; }
     if (keys[GLFW_KEY_SPACE])      { this->camera_pos += cam_speed * camera_up; }
-    
-    return;
+
+    if (InputState::just_pressed_static(keys, prev_keys, GLFW_KEY_LEFT_CONTROL)) {
+        if (this->cam_speed == 0.007f) {
+            this->cam_speed *= 2.3;
+        } else {
+            this->cam_speed = 0.007f;
+        }
+    }
 }
 
 void Camera::on_mouse_move(double x, double y) {
