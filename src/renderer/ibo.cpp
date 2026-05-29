@@ -1,6 +1,10 @@
 #include "ibo.h"
 
-IBO::IBO() {
+
+
+IBO::IBO() = default;
+
+void IBO::init() {
     glGenBuffers(1, &this->ID);
 }
 

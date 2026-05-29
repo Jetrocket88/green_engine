@@ -3,12 +3,18 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cstring>
 
-struct InputState {
+class InputState {
+private:
     bool keys      [GLFW_KEY_LAST] = {};
     bool prev_keys [GLFW_KEY_LAST] = {};
     float mouse_x, mouse_y;
     float scroll_delta;
+
+public:
+    InputState();
+    void init(); 
 
     void poll_input(GLFWwindow* window) {
         memcpy(prev_keys, keys, sizeof(keys));
@@ -22,7 +28,6 @@ struct InputState {
     static bool just_pressed_static(bool* keys, bool* prev_keys, int key) {
         return keys[key] && !prev_keys[key];
     }
-
 };
 
 #endif //INPUT_STATE_H

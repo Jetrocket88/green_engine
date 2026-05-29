@@ -16,6 +16,7 @@
 class Camera {
 public:
     Camera();
+    void init();
 
     glm::mat4 calculate_view();
     void update_pos(bool *keys, bool *prev_keys, float delta_time);

@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
 #include <vector>
 #include <memory>
@@ -16,44 +17,29 @@
 #include "renderer/ibo.h"
 #include "renderer/texture.h"
 #include "renderer/text.h"
-#include "renderer/renderer.h"
 #include "renderer/camera.h"
-#include "renderer/renderer.h"
+#include "renderer/model.h"
 
-#define COLOR_SPLIT(vec4) (vec4.x), (vec4.y), (vec4.z), (vec4.w)
-
-struct Vertex {
-    glm::vec3 position;
-    glm::vec4 color;
-    glm::vec2 texCoord;
-};
 
 class Renderer {
 public:
     Renderer();
-    void init(GLFWwindow* window);
-    void begin_frame(const MVP& mvp);
-    //void submit(const Model& model, const Transform& transform);
-    void end_frame(GLFWwindow* window );
+    void init();
     void shutdown();
-    void render_solid_background(const glm::vec4& color);
+
+    GLFWwindow* get_window() const { return m_window; };
+    bool should_close() const { return glfwWindowShouldClose(m_window); };
+
 
 private:
-    /*
-        0, 1, 3,   
-        1, 2, 3
-    */
-     
     std::unordered_map<std::string, std::unique_ptr<Shader>> shaders;
     std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
-    //Framebuffer m_Framebuffer;
 
-    std::vector<Vertex> v;
-    std::vector<unsigned int> indices;
     VAO vao;
     VBO vbo;
     IBO ibo;
 
+    GLFWwindow* m_window = nullptr;
 };
 
 

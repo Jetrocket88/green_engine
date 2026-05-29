@@ -9,9 +9,8 @@ class VBO {
 public:
     unsigned int ID {};
     VBO();
+    void init();
     void add_data(const void* data, size_t size);
-
-
 
 private:
 

@@ -8,6 +8,7 @@ class IBO {
 public:
     unsigned int ID;
     IBO();
+    void init();
     void add_data(const unsigned int *data, size_t n);
     void bind() const;
 

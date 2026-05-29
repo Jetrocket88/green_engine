@@ -24,10 +24,6 @@ Window::Window(size_t width, size_t height, std::string text) {
 
     glfwMakeContextCurrent(this->ptr);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-    }  
 
     glViewport(0, 0, this->width, this->height);
     glfwSetInputMode(this->ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

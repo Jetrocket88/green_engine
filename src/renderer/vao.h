@@ -9,6 +9,7 @@ class VAO {
 public:
     unsigned int ID {};
     VAO();
+    void init();
     void bind() const;
     void unbind() const;
 

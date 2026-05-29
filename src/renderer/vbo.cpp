@@ -1,7 +1,6 @@
 #include "vbo.h"
 
-VBO::VBO() {
-}
+VBO::VBO() = default;
 
 void VBO::add_data(const void* data, size_t size) {
     glGenBuffers(1, &this->ID);

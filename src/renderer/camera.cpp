@@ -1,6 +1,8 @@
 #include "camera.h"
 
-Camera::Camera() {
+Camera::Camera() = default;
+
+void Camera::init() {
     camera_pos    = glm::vec3(0.0f, 0.0f,  3.0f);
     camera_front  = glm::vec3(0.0f, 0.0f, -1.0f);
     camera_up     = glm::vec3(0.0f, 1.0f,  0.0f);
@@ -11,6 +13,7 @@ Camera::Camera() {
     first_mouse   =   true;
     lastX = lastY =   0.0f;
 }
+
 glm::mat4 Camera::calculate_view() {
     this->view = glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
     return this->view;
