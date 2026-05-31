@@ -42,6 +42,7 @@ void Renderer::init() {
     });
 
     load_shader("default", "assets/shaders/vertex.shader", "assets/shaders/fragment.shader");
+    load_shader("default-blue", "assets/shaders/vertex.shader", "assets/shaders/fragment-blue.shader");
 }
 
 void Renderer::load_shader(
@@ -66,6 +67,7 @@ Shader *Renderer::get_shader(const std::string& name) {
 void Renderer::update(float dt) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCheckError("Gl clear");
 
     Shader* active_shader = nullptr;
     Camera* camera = Services::get<Camera>();
@@ -82,11 +84,15 @@ void Renderer::update(float dt) {
             shader->set_mat4f("view",       &view      );
             shader->set_mat4f("projection", &projection);
             active_shader = shader;
+            glCheckError("Changing shader to active_shader");
         }
         shader->set_mat4f("model", &call.transform);
+        glCheckError("Setting the call.transform matrix");
         call.model->bind();
+        glCheckError("After binding the call.model");
         glDrawArrays(GL_TRIANGLES, 0, call.model->index_count());
-        glCheckError();
+
+        glCheckError("After drawing");
     }
 
     m_draw_queue.clear();
@@ -101,6 +107,6 @@ void Renderer::shutdown() {
 
 Renderer::Renderer() = default;
 
-void Renderer::submit(const Model* model, std::string shader, const glm::mat4& transform) {
-    m_draw_queue.push_back((DrawCall){model, shader, transform});
+void Renderer::submit(const Model* model, std::string shader, std::string texture, const glm::mat4& transform) {
+    m_draw_queue.push_back((DrawCall){model, shader, texture, transform});
 }

@@ -21,6 +21,7 @@
 struct DrawCall {
     const Model*    model;
     std::string     shader;
+    std::string     texture;
     glm::mat4       transform;
 };
 
@@ -34,7 +35,7 @@ public:
     GLFWwindow* get_window() const { return m_window; };
     bool should_close() const { return glfwWindowShouldClose(m_window); };
     void update(float dt);
-    void submit(const Model* model, std::string shader, const glm::mat4& transform);
+    void submit(const Model* model, std::string shader, std::string texture, const glm::mat4& transform);
 
     Shader *get_shader(const std::string& name);
     void load_shader(const std::string& name, const std::string& vPath, const std::string& fPath);

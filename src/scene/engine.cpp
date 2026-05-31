@@ -9,12 +9,34 @@ void Engine::init() {
     Services::provide<InputState> (&m_input_state);
     Services::provide<Renderer>   (&m_renderer   );
     Services::provide<Camera>     (&m_camera     );
+    Services::provide<Scene>      (&m_scene      );
 
+    m_models.reserve(100);
     load_models();
 }
 
 void Engine::load_models() {
-    m_temp.init("assets/models/test.obj");
+    Model model;
+    model.init("assets/models/test.obj");
+    m_models.push_back(std::move(model));
+
+    m_scene.add_object(
+        &m_models.back(),
+        "default",
+        "none",
+        glm::mat4(1.0f)
+    );
+
+    glm::mat4 temp = 
+        glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f))
+        * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 3.0f, 1.0f));
+    ;
+    m_scene.add_object(
+        &m_models.back(),
+        "default-blue",
+        "none",
+        temp
+    );
 }
 
 void Engine::run() {
@@ -36,8 +58,7 @@ void Engine::run() {
 void Engine::tick(float dt) {
     m_input_state.poll_input(m_renderer.get_window());
 
-    m_renderer.submit(&m_temp, "default", glm::mat4(1.0f));
-    m_renderer.submit(&m_temp, "default-blue", glm::mat4(0.1f));
+    m_scene.update(dt);
 
     m_camera.update(dt);
     m_renderer.update(dt);

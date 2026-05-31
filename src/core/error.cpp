@@ -1,10 +1,12 @@
 #include "error.h"
 
-GLenum glCheckError_(const char *file, int line)
+GLenum glCheckError_(const char *file, int line, const char* location)
 {
     GLenum errorCode;
+    GLenum lastError = GL_NO_ERROR;
     while ((errorCode = glGetError()) != GL_NO_ERROR)
     {
+        lastError = errorCode;
         std::string error;
         switch (errorCode)
         {
@@ -16,7 +18,8 @@ GLenum glCheckError_(const char *file, int line)
             case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
             case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
         }
+        std::cout << "Error at location: " << location << "\n";
         std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     }
-    return errorCode;
+    return lastError;
 }

@@ -6,6 +6,7 @@
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
 #include "renderer/model.h"
+#include "scene/scene.h"
 
 #include "../vendor/glm/glm.hpp"
 
@@ -26,7 +27,9 @@ private:
     InputState m_input_state;
     Renderer   m_renderer;
     Camera     m_camera;
-    Model      m_temp;
+    Scene      m_scene;
+
+    std::vector<Model> m_models;
     bool m_running = false;
 };
 

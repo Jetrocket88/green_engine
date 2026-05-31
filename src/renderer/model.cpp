@@ -20,7 +20,7 @@ void Model::init(const char *path) {
 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(2);
-    glCheckError();
+    glCheckError("After configuring vertex attrib pointers");
 
     m_vao.unbind();
     m_vbo.unbind();
