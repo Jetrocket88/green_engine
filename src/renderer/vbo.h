@@ -7,12 +7,16 @@
 
 class VBO {
 public:
-    unsigned int ID {};
     VBO();
-    void init();
+    void init() {glGenBuffers(1, &m_ID); }
+
+    void bind() const {glBindBuffer(GL_ARRAY_BUFFER, m_ID); }
+    void unbind() const {glBindBuffer(GL_ARRAY_BUFFER, 0); }
+
     void add_data(const void* data, size_t size);
 
 private:
+    unsigned int m_ID {};
 
 };
 

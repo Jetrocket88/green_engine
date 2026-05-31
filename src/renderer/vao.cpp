@@ -3,11 +3,11 @@
 VAO::VAO() = default;
 
 void VAO::init() {
-    glGenVertexArrays(1, &this->ID);
+    glGenVertexArrays(1, &m_ID);
 }
 
 void VAO::bind() const {
-    glBindVertexArray(this->ID);
+    glBindVertexArray(m_ID);
 }
 
 void VAO::unbind() const {

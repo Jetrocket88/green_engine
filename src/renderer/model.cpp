@@ -1,11 +1,32 @@
 #include "model.h"
 
-bool Model::load_obj(
-    const char* path,
-    std::vector<glm::vec3> &out_vertices,
-    std::vector<glm::vec2> &out_uvs,
-    std::vector<glm::vec3> &out_normals
-)  {
+Model::Model() = default;
+
+void Model::init(const char *path) {
+    load_obj_from_file(path);
+
+    m_vao.init();
+    m_vbo.init();
+
+    m_vao.bind();
+    m_vbo.bind();
+    m_vbo.add_data(m_vertex_array.data(), m_vertex_array.size() * sizeof(Vertex));
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(2);
+    glCheckError();
+
+    m_vao.unbind();
+    m_vbo.unbind();
+}
+
+bool Model::load_obj_from_file(const char* path) {
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
@@ -30,13 +51,6 @@ bool Model::load_obj(
     std::istringstream stream(source);
     std::string line;
 
-    /*
-    Vertex {
-        glm::vec3 position;
-        glm::vec3 normals;
-        glm::vec2 texCoords;
-    };
-    */
     int matches = 0;
 
     while (std::getline(stream, line)) {
@@ -59,7 +73,7 @@ bool Model::load_obj(
             glm::vec3 normal;
             std::stringstream temp(line);
             std::string vn = "vn";
-            temp >> vn >> normal.x, normal.y, normal.z;
+            temp >> vn >> normal.x >> normal.y >> normal.z;
             temp_normals.push_back(normal);
 
         } else if (line.find("f ") != std::string::npos) {
@@ -101,22 +115,33 @@ bool Model::load_obj(
     for (unsigned int i = 0; i < vertexIndices.size(); i++) {
         unsigned int vertexIndex = vertexIndices[i];
         glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-        out_vertices.push_back(vertex);
+        m_out_vertices.push_back(vertex);
     }
     for (unsigned int i = 0; i < uvIndices.size(); i++) {
         if (matches != 9) {
-            out_uvs.push_back((glm::vec2){0, 0});
+            m_out_uvs.push_back((glm::vec2){0, 0});
         } else {
             unsigned int uvIndex = uvIndices[i];
             glm::vec2 temp = temp_uvs[uvIndex- 1];
-            out_uvs.push_back(temp);
+            m_out_uvs.push_back(temp);
         }
     }
     for (unsigned int i = 0; i < normalIndices.size(); i++) {
         unsigned int normalIndex = normalIndices[i];
         glm::vec3 temp = temp_normals[normalIndex - 1];
-        out_normals.push_back(temp);
+        m_out_normals.push_back(temp);
     }
+
+    std::vector<Vertex> temp(m_out_vertices.size());
+    for (size_t i = 0; i < m_out_vertices.size(); i++) {
+        Vertex v;
+        v.pos    = m_out_vertices[i];
+        v.normal = m_out_normals [i];
+        v.uv     = m_out_uvs     [i];
+        temp[i] = v;
+    }
+    m_vertex_array = temp;
+    
     auto end = std::chrono::high_resolution_clock::now();
     auto elsapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 

@@ -1,10 +1,10 @@
 #include "Shader.h"
 
 Shader::Shader() {
-    this->vertexID   = glCreateShader(GL_VERTEX_SHADER  );
-    this->fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+    this->m_vertexID   = glCreateShader(GL_VERTEX_SHADER  );
+    this->m_fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
 }
-void Shader::load_shaders(const std::string vertexPath, const std::string fragmentPath) {
+void Shader::init(const std::string vertexPath, const std::string fragmentPath) {
 
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -40,38 +40,31 @@ void Shader::load_shaders(const std::string vertexPath, const std::string fragme
     //std::cout << "Vertex:\n" << vShaderCode << '\n';
     //std::cout << "Fragment:\n" << fShaderCode << '\n';
 
-    glShaderSource(this->vertexID, 1, &vShaderCode, NULL);
-    glCompileShader(this->vertexID);
+    glShaderSource(this->m_vertexID, 1, &vShaderCode, NULL);
+    glCompileShader(this->m_vertexID);
     check_shader_compilation(VERTEX);
 
-    glShaderSource(this->fragmentID, 1, &fShaderCode, NULL);
-    glCompileShader(this->fragmentID);
+    glShaderSource(this->m_fragmentID, 1, &fShaderCode, NULL);
+    glCompileShader(this->m_fragmentID);
     check_shader_compilation(FRAGMENT);
 
-    this->ID = glCreateProgram();
+    m_ID = glCreateProgram();
 
-    glAttachShader(this->ID, this->vertexID  );
-    glAttachShader(this->ID, this->fragmentID);
+    glAttachShader(m_ID, this->m_vertexID  );
+    glAttachShader(m_ID, this->m_fragmentID);
 
-    glLinkProgram(this->ID);
-    glUseProgram(this->ID);
+    glLinkProgram(m_ID);
+    glUseProgram(m_ID);
 
-    glDeleteShader(this->vertexID  );
-    glDeleteShader(this->fragmentID);
+    glDeleteShader(this->m_vertexID  );
+    glDeleteShader(this->m_fragmentID);
 }
 
 
 void Shader::check_shader_compilation(ShaderType type) {
     unsigned int shader;
-    if (type == VERTEX) {
-        shader = this->vertexID;
-
-    } else if (type == FRAGMENT) {
-        shader = this->fragmentID;
-
-    } else {
-        //unreachable
-    }
+    if (type == VERTEX) { shader = this->m_vertexID; }
+    else if (type == FRAGMENT) { shader = this->m_fragmentID; } 
 
     int success;
     char infoLog[512];
@@ -86,20 +79,15 @@ void Shader::check_shader_compilation(ShaderType type) {
 void Shader::check_shader_linking() {
     int  success;
     char infoLog[512];
-    glGetProgramiv(this->ID, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
     if(!success) {
-        glGetProgramInfoLog(this->ID, 512, NULL, infoLog);
+        glGetProgramInfoLog(m_ID, 512, NULL, infoLog);
         std::cout << "ERROR:SHADER:PROGRAM:LINKING_FAILED\n" << infoLog << std::endl;
     }
 }
 
-void Shader::bind() {
-    glUseProgram(this->ID);
-}
-
-
 void Shader::set_vec4f(const std::string& location, const glm::vec4& vec) {
-    int address = glGetUniformLocation(this->ID, location.c_str());
+    int address = glGetUniformLocation(m_ID, location.c_str());
     this->bind();
     glUniform4f(address, vec.x, vec.y, vec.z, vec.w);
     return; 
@@ -107,7 +95,7 @@ void Shader::set_vec4f(const std::string& location, const glm::vec4& vec) {
 
 
 void Shader::set_mat4f(const std::string& location, const glm::mat4* mat) {
-    int address = glGetUniformLocation(this->ID, location.c_str());
+    int address = glGetUniformLocation(m_ID, location.c_str());
     this->bind();
     glUniformMatrix4fv(address, 1, GL_FALSE, glm::value_ptr(*mat));
 

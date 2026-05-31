@@ -26,7 +26,6 @@ Window::Window(size_t width, size_t height, std::string text) {
 
 
     glViewport(0, 0, this->width, this->height);
-    glfwSetInputMode(this->ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetInputMode(this->ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (glfwRawMouseMotionSupported())

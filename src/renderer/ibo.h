@@ -6,13 +6,14 @@
 
 class IBO {
 public:
-    unsigned int ID;
     IBO();
     void init();
     void add_data(const unsigned int *data, size_t n);
-    void bind() const;
+
+    void bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID); }
 
 private:
+    unsigned int m_ID;
 
 };
 

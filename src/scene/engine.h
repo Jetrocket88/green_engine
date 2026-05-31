@@ -5,6 +5,11 @@
 #include "core/input_state.h"
 #include "renderer/renderer.h"
 #include "renderer/camera.h"
+#include "renderer/model.h"
+
+#include "../vendor/glm/glm.hpp"
+
+#include <iostream>
 
 enum class GameState { Playing, Paused, MainMenu, GameOver };
 
@@ -15,11 +20,13 @@ public:
     void run();
     void shutdown();
 private:
+    void load_models();
     void tick(float dt);
 
     InputState m_input_state;
     Renderer   m_renderer;
     Camera     m_camera;
+    Model      m_temp;
     bool m_running = false;
 };
 

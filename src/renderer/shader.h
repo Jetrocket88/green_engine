@@ -25,9 +25,10 @@ private:
     void check_shader_linking();
 
 public:
-    unsigned int vertexID, fragmentID, ID;
-    void load_shaders(const std::string vertexPath, const std::string fragmentPath);
-    void bind();
+    unsigned int m_vertexID, m_fragmentID, m_ID;
+    void init(const std::string vertexPath, const std::string fragmentPath);
+    void bind()   {glUseProgram(m_ID); }
+    void unbind() {glUseProgram(0);        }
 
     void set_vec4f(const std::string& location, const glm::vec4& vec);
     void set_mat4f(const std::string& location, const glm::mat4* vec);
@@ -35,10 +36,6 @@ public:
 
     
     Shader();
-
-
-
-
 };
 
 #endif //SHADER_H
